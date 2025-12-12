@@ -1,27 +1,39 @@
-/* ===========================
+/* ============================================================================
    INITIALIZATION
-=========================== */
+   Инициализация DarkCore Terminal
+   ============================================================================ */
 
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
-    // Инициализируем визуальные эффекты
+    console.log('DarkCore Terminal v2.1 - Инициализация...');
+
+    // 1. Инициализируем визуальные эффекты
     Visuals.init();
 
-    // Инициализируем терминал
+    // 2. Инициализируем терминал (уже включает файловую систему)
     Terminal.init();
 
-    // Добавляем эффект приветствия
+    // 3. Показать приветственное сообщение
     setTimeout(() => {
-        Terminal.print("[Система готова к работе]");
-    }, 1000);
+        // Чтение и вывод файла MOTD
+        const motdResult = FileSystem.readFile('/etc/motd');
+        if (motdResult.success) {
+            Terminal.print(motdResult.content);
+        }
 
-    // Глобальные объекты для отладки
+        Terminal.print(`\nСистема готова. Текущий каталог: ${FileSystem.currentPath}`);
+        Terminal.print('Введите "help" для списка команд или "help filesystem" для работы с файлами.');
+    }, 500);
+
+    // 4. Глобальные объекты для отладки
     window.Terminal = Terminal;
-    window.Filesystem = Filesystem;
+    window.FileSystem = FileSystem;
     window.Editor = Editor;
     window.Visuals = Visuals;
     window.Commands = Commands;
 
-    console.log('DarkCore Terminal v2.1 initialized');
-    console.log('Доступные объекты: Terminal, Filesystem, Editor, Visuals, Commands');
+    console.log('DarkCore Terminal v2.1 инициализирован');
+    console.log('Доступные объекты: Terminal, FileSystem, Editor, Visuals, Commands');
+    console.log('Текущий каталог:', FileSystem.currentPath);
+    console.log('Корневая файловая система:', FileSystem.fs);
 });

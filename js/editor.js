@@ -1,65 +1,174 @@
-/* ===========================
-   ENHANCED NANO EDITOR
-=========================== */
+/* ============================================================================
+   ENHANCED NANO EDITOR v2.0
+   Улучшенный редактор с подтверждениями и автодополнением
+   ============================================================================ */
 
 const Editor = {
+    // Состояние редактора
     nanoMode: false,
     nanoFile: null,
     nanoBuffer: [],
     cursor: { row: 0, col: 0 },
     originalContent: "",
 
+    // Состояние подтверждения
+    confirmationMode: false,
+    confirmationAction: null, // 'exit', 'exitWithoutSave', 'discard'
+    confirmationMessage: "",
+
     // Вход в режим редактора
     enter(file) {
+        const resolvedPath = FileSystem.resolvePath(file);
+
+        // Проверить, существует ли файл
+        if (FileSystem.exists(resolvedPath)) {
+            const readResult = FileSystem.readFile(resolvedPath);
+
+            if (!readResult.success) {
+                Terminal.print(`Ошибка: ${readResult.error}`);
+                return;
+            }
+
+            this.nanoBuffer = readResult.content.split("\n");
+            this.originalContent = readResult.content;
+        } else {
+            // Создать новый файл
+            this.nanoBuffer = [""];
+            this.originalContent = "";
+        }
+
         this.nanoMode = true;
-        this.nanoFile = file;
-        this.nanoBuffer = Filesystem.exists(file)
-            ? Filesystem.read(file).split("\n")
-            : [""];
-        this.originalContent = this.nanoBuffer.join("\n");
+        this.confirmationMode = false;
+        this.nanoFile = resolvedPath;
         this.cursor = { row: 0, col: this.nanoBuffer[0]?.length || 0 };
 
-        Terminal.print(`\n┌─[ NANO: ${file} ]────────────────────────────┐`);
-        Terminal.print("│ Ctrl+S: Сохранить   Ctrl+X: Выход        │");
-        Terminal.print("│ Стрелки: Навигация  Enter: Новая строка │");
-        Terminal.print("└──────────────────────────────────────────┘\n");
-
         this.display();
-        this.updateCursorDisplay();
+    },
+
+    // Получить имя файла из пути
+    getFileName(path) {
+        const parts = path.split('/').filter(p => p);
+        return parts.length > 0 ? parts[parts.length - 1] : path;
     },
 
     // Отображение содержимого редактора с курсором
     display() {
         Terminal.output.innerHTML = "";
-        Terminal.print(`┌─[ NANO: ${this.nanoFile} ]────────────────────────────┐`);
+
+        if (this.confirmationMode) {
+            this.displayConfirmation();
+            return;
+        }
+
+        Terminal.print(`\n┌─[ NANO: ${this.getFileName(this.nanoFile)} ]${'─'.repeat(40)}┐`);
         Terminal.print("│ Ctrl+S: Сохранить   Ctrl+X: Выход        │");
         Terminal.print("│ Стрелки: Навигация  Enter: Новая строка │");
-        Terminal.print("└──────────────────────────────────────────┘\n");
+        Terminal.print(`└${'─'.repeat(54)}┘\n`);
 
-        this.nanoBuffer.forEach((line, i) => {
+        // Показать номер строки и содержимое
+        const startLine = Math.max(0, this.cursor.row - 10);
+        const endLine = Math.min(this.nanoBuffer.length, startLine + 20);
+
+        for (let i = startLine; i < endLine; i++) {
             let lineNum = (i + 1).toString().padStart(3, ' ');
 
             if (i === this.cursor.row) {
                 // Показываем курсор на текущей строке
-                let beforeCursor = line.substring(0, this.cursor.col);
-                let afterCursor = line.substring(this.cursor.col);
+                let beforeCursor = this.nanoBuffer[i].substring(0, this.cursor.col);
+                let afterCursor = this.nanoBuffer[i].substring(this.cursor.col);
                 Terminal.print(`${lineNum}  ${beforeCursor}<span class="cursor">█</span>${afterCursor}`);
             } else {
-                Terminal.print(`${lineNum}  ${line}`);
+                Terminal.print(`${lineNum}  ${this.nanoBuffer[i]}`);
             }
-        });
+        }
 
-        Terminal.print(`\n[Строка ${this.cursor.row + 1}, Колонка ${this.cursor.col + 1} | Всего строк: ${this.nanoBuffer.length}]`);
+        // Статистика
+        const totalLines = this.nanoBuffer.length;
+        const currentLine = this.cursor.row + 1;
+        const currentCol = this.cursor.col + 1;
+        const fileSize = this.nanoBuffer.join("\n").length;
+
+        Terminal.print(`\n┌${'─'.repeat(54)}┐`);
+        Terminal.print(`│ Строка ${currentLine}/${totalLines}, Колонка ${currentCol} │ Размер: ${fileSize} байт │`);
+        Terminal.print(`└${'─'.repeat(54)}┘`);
+
+        // Предупреждение о несохранённых изменениях
+        const newContent = this.nanoBuffer.join("\n");
+        if (newContent !== this.originalContent) {
+            Terminal.print(`\n[!] Есть несохранённые изменения. Ctrl+S для сохранения.`);
+        }
+    },
+
+    // Отображение окна подтверждения
+    displayConfirmation() {
+        Terminal.print(`\n┌─[ ПОДТВЕРЖДЕНИЕ ]${'─'.repeat(45)}┐`);
+        Terminal.print(`│ ${this.confirmationMessage.padEnd(55)}│`);
+        Terminal.print(`│${' '.repeat(57)}│`);
+        Terminal.print(`│ [Y] Да    [N] Нет                                │`);
+        Terminal.print(`└${'─'.repeat(57)}┘\n`);
+        Terminal.print("Введите Y (Да) или N (Нет):");
+    },
+
+    // Запрос подтверждения
+    askConfirmation(action, message) {
+        this.confirmationMode = true;
+        this.confirmationAction = action;
+        this.confirmationMessage = message;
+        this.display();
+    },
+
+    // Обработка ответа на подтверждение
+    handleConfirmation(response) {
+        this.confirmationMode = false;
+
+        if (response === 'y' || response === 'Y' || response === 'д' || response === 'Д') {
+            // Пользователь подтвердил
+            switch (this.confirmationAction) {
+                case 'exit':
+                    this.performExit();
+                    break;
+                case 'exitWithoutSave':
+                    this.performForceExit();
+                    break;
+                case 'discard':
+                    this.discardChanges();
+                    break;
+            }
+        } else {
+            // Пользователь отказался
+            this.display();
+        }
     },
 
     // Обновление только курсора (без полной перерисовки)
     updateCursorDisplay() {
-        // Для простоты перерисовываем весь экран
         this.display();
     },
 
     // Обработка нажатий клавиш в редакторе
     handleNanoKey(e) {
+        // Режим подтверждения
+        if (this.confirmationMode) {
+            if (e.key === 'y' || e.key === 'Y' || e.key === 'д' || e.key === 'Д') {
+                e.preventDefault();
+                this.handleConfirmation('y');
+                return;
+            } else if (e.key === 'n' || e.key === 'N' || e.key === 'н' || e.key === 'Н') {
+                e.preventDefault();
+                this.handleConfirmation('n');
+                return;
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                this.confirmationMode = false;
+                this.display();
+                return;
+            }
+
+            // Игнорируем другие клавиши в режиме подтверждения
+            e.preventDefault();
+            return;
+        }
+
         // Навигация
         if (e.key === "ArrowUp") {
             e.preventDefault();
@@ -122,6 +231,20 @@ const Editor = {
             return;
         }
 
+        // Page Up
+        if (e.key === "PageUp") {
+            e.preventDefault();
+            this.moveCursor(-10, 0);
+            return;
+        }
+
+        // Page Down
+        if (e.key === "PageDown") {
+            e.preventDefault();
+            this.moveCursor(10, 0);
+            return;
+        }
+
         // Сохранение
         if (e.ctrlKey && e.key.toLowerCase() === "s") {
             e.preventDefault();
@@ -129,10 +252,10 @@ const Editor = {
             return;
         }
 
-        // Выход
+        // Выход с подтверждением
         if (e.ctrlKey && e.key.toLowerCase() === "x") {
             e.preventDefault();
-            this.exit();
+            this.requestExit();
             return;
         }
 
@@ -148,6 +271,71 @@ const Editor = {
             e.preventDefault();
             this.insertText("    ");
             return;
+        }
+
+        // Escape - отмена любых действий
+        if (e.key === "Escape") {
+            e.preventDefault();
+            this.cancelOperations();
+            return;
+        }
+    },
+
+    // Запрос выхода с проверкой изменений
+    requestExit() {
+        const newContent = this.nanoBuffer.join("\n");
+
+        if (newContent !== this.originalContent) {
+            // Есть несохранённые изменения
+            this.askConfirmation(
+                'exit',
+                'Есть несохранённые изменения. Выйти без сохранения?'
+            );
+        } else {
+            // Нет изменений - просто выходим
+            this.performExit();
+        }
+    },
+
+    // Выполнение выхода
+    performExit() {
+        this.nanoMode = false;
+        this.confirmationMode = false;
+        this.nanoFile = null;
+        this.nanoBuffer = [];
+        this.cursor = { row: 0, col: 0 };
+        Terminal.print("\n[ВЫХОД ИЗ РЕДАКТОРА]");
+        Terminal.cmd.value = "";
+        Terminal.cmd.focus();
+    },
+
+    // Выход без сохранения (принудительный)
+    performForceExit() {
+        this.nanoMode = false;
+        this.confirmationMode = false;
+        this.nanoFile = null;
+        this.nanoBuffer = [];
+        this.cursor = { row: 0, col: 0 };
+        Terminal.print("\n[ВЫХОД БЕЗ СОХРАНЕНИЯ]");
+        Terminal.cmd.value = "";
+        Terminal.cmd.focus();
+    },
+
+    // Отмена изменений
+    discardChanges() {
+        this.nanoBuffer = this.originalContent.split("\n");
+        this.cursor = { row: 0, col: 0 };
+        Terminal.print("\n[ИЗМЕНЕНИЯ ОТМЕНЕНЫ]");
+        this.display();
+    },
+
+    // Отмена операций
+    cancelOperations() {
+        if (this.confirmationMode) {
+            this.confirmationMode = false;
+            this.display();
+        } else {
+            Terminal.print("\n[ОПЕРАЦИЯ ОТМЕНЕНА]");
         }
     },
 
@@ -266,47 +454,17 @@ const Editor = {
     // Сохранение файла
     save() {
         const newContent = this.nanoBuffer.join("\n");
-        Filesystem.write(this.nanoFile, newContent);
+        const result = FileSystem.writeFile(this.nanoFile, newContent);
 
-        // Проверяем изменения
-        if (newContent !== this.originalContent) {
+        if (result.success) {
+            this.originalContent = newContent;
             Terminal.print("\n[СОХРАНЕНО]");
         } else {
-            Terminal.print("\n[НЕТ ИЗМЕНЕНИЙ]");
+            Terminal.print(`\n[ОШИБКА: ${result.error}]`);
         }
 
-        this.originalContent = newContent;
         this.updateCursorDisplay();
-    },
-
-    // Выход из редактора
-    exit() {
-        const newContent = this.nanoBuffer.join("\n");
-
-        // Проверяем наличие несохраненных изменений
-        if (newContent !== this.originalContent) {
-            Terminal.print("\n[НЕСОХРАНЕННЫЕ ИЗМЕНЕНИЯ!]");
-            Terminal.print("Нажмите Ctrl+S для сохранения или Ctrl+X для выхода без сохранения");
-            return;
-        }
-
-        this.nanoMode = false;
-        this.nanoFile = null;
-        this.nanoBuffer = [];
-        this.cursor = { row: 0, col: 0 };
-        Terminal.print("\n[ВЫХОД ИЗ РЕДАКТОРА]");
-        Terminal.cmd.value = "";
-        Terminal.cmd.focus();
-    },
-
-    // Быстрый выход без проверки
-    forceExit() {
-        this.nanoMode = false;
-        this.nanoFile = null;
-        this.nanoBuffer = [];
-        this.cursor = { row: 0, col: 0 };
-        Terminal.print("\n[ВЫХОД БЕЗ СОХРАНЕНИЯ]");
-        Terminal.cmd.value = "";
-        Terminal.cmd.focus();
     }
 };
+
+window.Editor = Editor;

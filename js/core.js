@@ -1,6 +1,7 @@
-/* ===========================
-   CORE TERMINAL SYSTEM
-=========================== */
+/* ============================================================================
+   CORE TERMINAL SYSTEM v2.1
+   Основная система терминала с автодополнением
+   ============================================================================ */
 
 const Terminal = {
     // Глобальные переменные
@@ -13,6 +14,11 @@ const Terminal = {
     // История команд
     history: [],
     historyPos: -1,
+
+    // Состояние автодополнения
+    tabPressCount: 0,
+    lastTabTime: 0,
+    currentCompletions: [],
 
     // Инициализация
     init() {
@@ -58,6 +64,8 @@ const Terminal = {
    DarkCore v2.1 — CRT Edition
    Загрузка завершена: ${new Date().toLocaleString()}
    Введите "help" для начала
+   
+   Подсказка: Нажмите Tab для автодополнения путей и команд
 `;
     },
 
@@ -130,22 +138,30 @@ const Terminal = {
 
     // Обработка нажатий клавиш
     handleKeyDown(e) {
-        // RGB Shift эффект при любом нажатии клавиши
-        if (!Editor.nanoMode && e.key.length === 1) {
-            Visuals.triggerRGBShift();
-        }
-
         // Режим редактора
         if (Editor.nanoMode) {
             Editor.handleNanoKey(e);
             return;
         }
 
+
+        // Обработка Tab для автодополнения
+        if (e.key === "Tab") {
+            e.preventDefault();
+            this.handleTabCompletion(e.shiftKey);
+            return;
+        }
+
+        // RGB Shift эффект при любом нажатии клавиши
+        if (e.key.length === 1 && !e.ctrlKey) {
+            Visuals.triggerRGBShift();
+        }
+
         // Навигация по истории
         if (e.key === "ArrowUp") {
             e.preventDefault();
             this.navigateHistory(-1);
-            setTimeout(() => this.updateCaretPosition(), 10); // Обновляем каретку после изменения текста
+            setTimeout(() => this.updateCaretPosition(), 10);
             return;
         }
 
@@ -175,10 +191,53 @@ const Terminal = {
             return;
         }
 
+        // Ctrl+L для очистки экрана
+        if (e.ctrlKey && e.key.toLowerCase() === "l") {
+            e.preventDefault();
+            this.clear();
+            return;
+        }
+
         // Для всех других клавиш обновляем каретку
         if (!e.ctrlKey) {
             setTimeout(() => this.updateCaretPosition(), 10);
         }
+    },
+
+    // Обработка автодополнения по Tab
+    handleTabCompletion(reverse = false) {
+        const currentTime = Date.now();
+        const input = this.cmd.value;
+        const cursorPos = this.cmd.selectionStart;
+
+        // Сбрасываем счетчик, если прошло больше 1 секунды
+        if (currentTime - this.lastTabTime > 1000) {
+            this.tabPressCount = 0;
+        }
+
+        this.lastTabTime = currentTime;
+
+        let result;
+
+        if (this.tabPressCount === 0) {
+            // Первое нажатие Tab - пытаемся автодополнить
+            result = Autocomplete.complete(input, cursorPos);
+        } else {
+            // Последующие нажатия - циклическое переключение
+            const direction = reverse ? 'prev' : 'next';
+            result = Autocomplete.cycleCompletions(input, cursorPos, direction);
+        }
+
+        // Обновляем поле ввода
+        this.cmd.value = result.input;
+        this.cmd.selectionStart = result.cursorPos;
+        this.cmd.selectionEnd = result.cursorPos;
+
+        // Увеличиваем счетчик нажатий Tab
+        this.tabPressCount++;
+
+        // Обновляем каретку
+        this.updateCaretPosition();
     },
 
     // Навигация по истории команд
@@ -192,6 +251,7 @@ const Terminal = {
         }
 
         this.cmd.value = this.history[this.historyPos] || "";
+        this.updateCaretPosition();
     },
 
     // Выполнение команды
@@ -208,6 +268,9 @@ const Terminal = {
         // Добавляем в историю
         this.history.push(raw);
         this.historyPos = this.history.length;
+
+        // Сбрасываем счетчик Tab
+        this.tabPressCount = 0;
 
         // Парсим команду
         const [name, ...args] = raw.split(" ");
@@ -235,3 +298,5 @@ const Terminal = {
         }
     }
 };
+
+window.Terminal = Terminal;
