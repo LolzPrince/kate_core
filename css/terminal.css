@@ -145,7 +145,8 @@ body {
 
 /* Эффект при активном поле ввода */
 #cmd:focus ~ #caret {
-    animation: caretBlinkFocus 0.7s infinite; /* Более быстрое мигание при фокусе */
+    animation: caretBlinkFocus 0.8s infinite;
+    opacity: 1;
 }
 
 @keyframes caretBlinkFocus {
@@ -165,9 +166,8 @@ body {
 
 /* Стиль каретки когда поле ввода не в фокусе */
 #cmd:not(:focus) ~ #caret {
-    opacity: 0.5; /* Полупрозрачная */
-    animation: none; /* Без анимации */
-    box-shadow: 0 0 5px rgba(0, 255, 136, 0.3); /* Меньшее свечение */
+    display: block !important;
+    opacity: 1 !important;
 }
 
 /* ============================================================================

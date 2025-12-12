@@ -7,6 +7,8 @@ const Visuals = {
     rgbShiftTimeout: null,
 
     triggerRGBShift() {
+        if (Editor.nanoMode) return;
+
         const inputLine = document.getElementById('input-line');
 
         // Удаляем предыдущий класс если есть

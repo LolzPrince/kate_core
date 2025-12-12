@@ -185,9 +185,11 @@ const Terminal = {
         }
 
         // Ctrl+X для выхода из редактора
-        if (e.ctrlKey && e.key.toLowerCase() === "x" && Editor.nanoMode) {
+        if (e.ctrlKey && e.key.toLowerCase() === "x") {
             e.preventDefault();
-            Editor.forceExit();
+            if (Editor.nanoMode) {
+                Editor.forceExit();
+            }
             return;
         }
 

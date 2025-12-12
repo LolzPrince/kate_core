@@ -255,8 +255,21 @@ const Editor = {
         // Выход с подтверждением
         if (e.ctrlKey && e.key.toLowerCase() === "x") {
             e.preventDefault();
-            this.requestExit();
-            return;
+
+            // Если в режиме редактора - выходим
+            if (Editor.nanoMode) {
+                // Если есть изменения, спрашиваем подтверждение
+                const newContent = Editor.nanoBuffer.join("\n");
+                if (newContent !== Editor.originalContent) {
+                    Editor.askConfirmation(
+                        'exit',
+                        'Есть несохранённые изменения. Выйти без сохранения?'
+                    );
+                } else {
+                    Editor.performExit();
+                }
+                return;
+            }
         }
 
         // Ввод текста
@@ -297,16 +310,42 @@ const Editor = {
         }
     },
 
+    forceExit: function() {
+        if (this.confirmationMode) {
+            this.confirmationMode = false;
+        }
+
+        this.nanoMode = false;
+        this.nanoFile = null;
+        this.nanoBuffer = [];
+        this.cursor = { row: 0, col: 0 };
+
+        // Полная очистка вывода
+        Terminal.output.innerHTML = "";
+        Terminal.print("[ВЫХОД ИЗ РЕДАКТОРА БЕЗ СОХРАНЕНИЯ]");
+        Terminal.cmd.value = "";
+        Terminal.cmd.focus();
+
+        // Обновляем каретку
+        setTimeout(() => Terminal.updateCaretPosition(), 10);
+    },
+
     // Выполнение выхода
-    performExit() {
+    performExit: function() {
         this.nanoMode = false;
         this.confirmationMode = false;
         this.nanoFile = null;
         this.nanoBuffer = [];
         this.cursor = { row: 0, col: 0 };
-        Terminal.print("\n[ВЫХОД ИЗ РЕДАКТОРА]");
+
+        // Полная очистка вывода
+        Terminal.output.innerHTML = "";
+        Terminal.print("[ВЫХОД ИЗ РЕДАКТОРА]");
         Terminal.cmd.value = "";
         Terminal.cmd.focus();
+
+        // Обновляем каретку
+        setTimeout(() => Terminal.updateCaretPosition(), 10);
     },
 
     // Выход без сохранения (принудительный)

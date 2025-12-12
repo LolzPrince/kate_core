@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Инициализируем терминал (уже включает файловую систему)
     Terminal.init();
-
     // 3. Показать приветственное сообщение
     setTimeout(() => {
         // Чтение и вывод файла MOTD
@@ -31,6 +30,15 @@ document.addEventListener('DOMContentLoaded', () => {
     window.Editor = Editor;
     window.Visuals = Visuals;
     window.Commands = Commands;
+
+    Editor.nanoMode = false;
+    Editor.confirmationMode = false;
+
+    setTimeout(() => {
+        Terminal.cmd.focus();
+        Terminal.updateCaretPosition();
+    }, 100);
+
 
     console.log('DarkCore Terminal v2.1 инициализирован');
     console.log('Доступные объекты: Terminal, FileSystem, Editor, Visuals, Commands');

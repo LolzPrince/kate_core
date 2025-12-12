@@ -390,18 +390,33 @@ const FileSystem = {
     },
 
     // Прочитать файл
-    readFile(path) {
-        const node = this.getNode(path);
+    readFile: function(path) {
+        try {
+            const node = this.getNode(path);
 
-        if (!node) {
-            return { success: false, error: `Файл не существует: ${path}` };
+            if (!node) {
+                return { success: false, error: `Файл не существует: ${path}` };
+            }
+
+            if (node.type !== 'file') {
+                return { success: false, error: `${path} не является файлом` };
+            }
+
+            // Гарантируем, что content всегда строка
+            const content = node.content || '';
+
+            return {
+                success: true,
+                content: content,
+                node: node
+            };
+        } catch (error) {
+            console.error('Error reading file:', error);
+            return {
+                success: false,
+                error: `Ошибка чтения файла: ${error.message}`
+            };
         }
-
-        if (node.type !== 'file') {
-            return { success: false, error: `${path} не является файлом` };
-        }
-
-        return { success: true, content: node.content, node: node };
     },
 
     // Удалить файл
