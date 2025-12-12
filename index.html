@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DarkCore Terminal v2.1 — CRT Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- CSS файлы -->
+    <link rel="stylesheet" href="css/terminal.css">
+    <link rel="stylesheet" href="css/crt-effects.css">
+</head>
+
+<body class="crt-flash">
+<!-- CRT Effect Layers -->
+<div id="screen">
+    <div class="chromatic-aberration"></div>
+    <div class="scanlines"></div>
+    <div class="vhs-bloom"></div>
+    <div class="glitch-noise"></div>
+    <div class="flicker"></div>
+    <div class="screen-curvature"></div>
+</div>
+
+<!-- Main Console -->
+<div id="console">
+    <div id="output"></div>
+    <div id="input-line">
+        <span id="prompt">❯</span>
+        <input id="cmd" type="text" autocomplete="off" spellcheck="false">
+        <!-- Элемент каретки -->
+        <div id="caret"></div>
+    </div>
+</div>
+
+<!-- JS файлы -->
+<script src="js/filesystem.js"></script>
+<script src="js/visuals.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/commands.js"></script>
+<script src="js/core.js"></script>
+<script src="js/init.js"></script>
+</body>
+</html>

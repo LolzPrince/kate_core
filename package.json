@@ -1,0 +1,17 @@
+{
+  "name": "darkcore-terminal",
+  "version": "2.1.0",
+  "description": "A dark fantasy CRT terminal emulator",
+  "main": "index.html",
+  "scripts": {
+    "start": "live-server --port=8080 --host=localhost",
+    "dev": "live-server --port=8080 --host=localhost --watch=.",
+    "build": "echo 'Build complete'"
+  },
+  "keywords": ["terminal", "crt", "retro", "fantasy"],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}
