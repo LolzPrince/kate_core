@@ -4,7 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6f17c915-219a-4d72-9a3c-14b697a74a61" name="Changes" comment="" />
+    <list default="true" id="6f17c915-219a-4d72-9a3c-14b697a74a61" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/js/game/graphics.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/js/game/quest.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/js/game/quest.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/commands.js" beforeDir="false" afterPath="$PROJECT_DIR$/js/commands.js" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

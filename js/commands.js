@@ -12,6 +12,18 @@ const Commands = {
         const category = args[0];
 
         const commands = {
+            quest: `
+Текстовый квест:
+  quest start          - начать новый квест Dark Quest
+  quest load           - загрузить сохранение
+  quest save           - сохранить прогресс
+  quest help           - помощь по квесту
+  quest exit           - выйти из квеста
+
+Dark Quest - атмосферный квест в стиле dark fantasy фильмов 80-х!
+Исследуйте проклятый замок, делайте выборы и находите все концовки.
+Пиксель-арт стиль, мрачная атмосфера, дерево решений.
+`,
             basic: `
 Основные команды:
   help [категория]    - показать справку
@@ -42,6 +54,15 @@ const Commands = {
   tree [путь]         - показать дерево каталогов
   du [путь]           - размер каталога
   df                  - свободное место
+  grep [паттерн] [файл] - поиск текста в файле
+  wc [файл]             - подсчет строк, слов, символов
+  head [файл]           - показать начало файла
+  tail [файл]           - показать конец файла
+  diff [файл1] [файл2]  - сравнить файлы
+  tar -czf архив файлы  - создать архив
+  tar -xzf архив        - распаковать архив
+  download [файл]       - скачать файл
+  upload                - загрузить файл
 `,
 
             editor: `
@@ -96,6 +117,7 @@ DarkCore Terminal v2.1 — Полная справка
   editor      - редактор
   system      - системные команды
   aliases     - псевдонимы
+  quest        - игры
 
 Пример: help filesystem
 `;
@@ -788,7 +810,36 @@ guest   - Гостевой доступ (заблокирован)
             setTimeout(Visuals.randomGlitch, i * 100);
         }
         return "Тест визуальных эффектов...";
-    }
+    },
+    quest: (args) => {
+        if (!args[0]) {
+            return `Использование: quest [команда]
+Доступные команды:
+  start  - Начать новый квест (Dark Fantasy 80s)
+  load   - Загрузить сохранение
+  save   - Сохранить прогресс
+  help   - Помощь по квесту
+  exit   - Выйти из квеста
+
+Dark Quest - текстовый квест в стиле dark fantasy фильмов 80-х!
+Пиксель-арт, мрачная атмосфера, несколько концовок.`;
+        }
+
+        switch(args[0].toLowerCase()) {
+            case 'start':
+                return DarkQuest.init();
+            case 'load':
+                return DarkQuest.load();
+            case 'save':
+                return DarkQuest.save();
+            case 'help':
+                return DarkQuest.getHelp();
+            case 'exit':
+                return DarkQuest.exit();
+            default:
+                return `Неизвестная команда квеста: ${args[0]}`;
+        }
+    },
 };
 
 // Псевдонимы для совместимости со старыми командами

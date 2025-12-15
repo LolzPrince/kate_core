@@ -1,0 +1,344 @@
+/* ============================================================================
+   DARK QUEST - Pixel Art Adventure (80s Dark Fantasy Style)
+   Пиксель-арт квест в стиле фильмов 80-х
+   ============================================================================ */
+
+/* Основной контейнер квеста */
+.quest-container {
+    position: relative;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #0a0a0a;
+    border: 4px solid #8b0000;
+    border-radius: 8px;
+    box-shadow:
+            0 0 40px rgba(139, 0, 0, 0.5),
+            inset 0 0 30px rgba(0, 0, 0, 0.8);
+    font-family: "IBM Plex Mono", monospace;
+    color: #d4af37;
+    overflow: hidden;
+}
+
+/* Заголовок в стиле 80-х */
+.quest-title {
+    text-align: center;
+    color: #ff0000;
+    font-size: 28px;
+    margin-bottom: 20px;
+    text-shadow:
+            0 0 10px #ff0000,
+            0 0 20px #ff0000,
+            0 0 30px #8b0000;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-bottom: 3px solid #d4af37;
+    padding-bottom: 10px;
+    animation: titleGlow 2s infinite alternate;
+}
+
+@keyframes titleGlow {
+    from { text-shadow: 0 0 10px #ff0000; }
+    to { text-shadow: 0 0 20px #ff0000, 0 0 30px #ff4500; }
+}
+
+/* Область сцены */
+.scene-container {
+    margin: 20px 0;
+    padding: 15px;
+    background: #1a1a1a;
+    border: 2px solid #444;
+    border-radius: 5px;
+    position: relative;
+    min-height: 200px;
+}
+
+/* Пиксель-арт изображение */
+.pixel-art {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    border: 3px solid #333;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* ASCII арт альтернатива */
+.ascii-art {
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1;
+    color: #d4af37;
+    white-space: pre;
+    text-align: center;
+    background: #111;
+    padding: 10px;
+    border: 2px solid #444;
+    margin: 10px 0;
+    overflow-x: auto;
+}
+
+/* Описание сцены */
+.scene-description {
+    background: rgba(0, 0, 0, 0.7);
+    border-left: 4px solid #8b0000;
+    padding: 15px;
+    margin: 15px 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #f0e68c;
+    border-radius: 0 5px 5px 0;
+}
+
+/* Панель выбора действий */
+.choice-panel {
+    display: grid;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.quest-choice {
+    padding: 12px 15px;
+    background: linear-gradient(145deg, #2f4f4f, #1a3a3a);
+    border: 2px solid #d4af37;
+    border-radius: 5px;
+    color: #f0e68c;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: left;
+    text-shadow: 0 0 5px #000;
+    position: relative;
+    overflow: hidden;
+}
+
+.quest-choice:hover {
+    background: linear-gradient(145deg, #3a5f5f, #2a4a4a);
+    border-color: #ffd700;
+    color: #ffffff;
+    transform: translateX(5px);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+}
+
+.quest-choice:active {
+    transform: translateX(2px);
+}
+
+.quest-choice::before {
+    content: '▶';
+    position: absolute;
+    left: 5px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.quest-choice:hover::before {
+    opacity: 1;
+}
+
+/* Статус игры */
+.quest-status {
+    display: flex;
+    justify-content: space-between;
+    background: rgba(139, 0, 0, 0.2);
+    padding: 10px;
+    border: 1px solid #8b0000;
+    border-radius: 5px;
+    margin: 15px 0;
+    font-size: 14px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-label {
+    color: #d4af37;
+    font-size: 12px;
+    margin-bottom: 3px;
+    display: block;
+}
+
+.stat-value {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Инвентарь */
+.inventory-panel {
+    background: rgba(47, 79, 79, 0.3);
+    border: 1px solid #2f4f4f;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 15px 0;
+}
+
+.inventory-title {
+    color: #d4af37;
+    font-size: 16px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.inventory-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.inventory-item {
+    background: rgba(105, 105, 105, 0.4);
+    border: 1px solid #696969;
+    border-radius: 3px;
+    padding: 5px 10px;
+    font-size: 12px;
+    color: #f0e68c;
+}
+
+/* Журнал событий */
+.quest-log {
+    max-height: 200px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid #444;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 15px 0;
+    font-size: 12px;
+}
+
+.log-entry {
+    margin: 5px 0;
+    padding: 5px;
+    border-left: 2px solid #8b0000;
+    background: rgba(139, 0, 0, 0.1);
+}
+
+/* Эффекты для разных исходов */
+.ending-good {
+    background: linear-gradient(145deg, #006400, #008000);
+    border-color: #32cd32;
+    color: #90ee90;
+}
+
+.ending-bad {
+    background: linear-gradient(145deg, #8b0000, #b22222);
+    border-color: #ff0000;
+    color: #ffcccb;
+}
+
+.ending-neutral {
+    background: linear-gradient(145deg, #4b0082, #8a2be2);
+    border-color: #9370db;
+    color: #d8bfd8;
+}
+
+/* Анимация печатающегося текста */
+.typewriter {
+    overflow: hidden;
+    border-right: 2px solid #d4af37;
+    white-space: nowrap;
+    animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: #d4af37 }
+}
+
+/* Всплывающие уведомления */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid #d4af37;
+    border-radius: 5px;
+    color: #d4af37;
+    z-index: 1000;
+    animation: slideIn 0.5s, fadeOut 0.5s 2.5s;
+    max-width: 300px;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .quest-container {
+        margin: 10px;
+        padding: 15px;
+    }
+
+    .quest-title {
+        font-size: 22px;
+    }
+
+    .scene-description {
+        font-size: 14px;
+    }
+
+    .quest-choice {
+        font-size: 13px;
+        padding: 10px;
+    }
+}
+
+/* Стилизация скроллбара */
+.quest-container ::-webkit-scrollbar {
+    width: 8px;
+}
+
+.quest-container ::-webkit-scrollbar-track {
+    background: #1a1a1a;
+    border-radius: 4px;
+}
+
+.quest-container ::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #8b0000, #ff0000);
+    border-radius: 4px;
+}
+
+/* Эффект VHS (для атмосферы 80-х) */
+.vhs-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.05;
+    background: repeating-linear-gradient(
+            0deg,
+            rgba(255, 0, 0, 0.1) 0px,
+            rgba(255, 0, 0, 0.1) 1px,
+            transparent 1px,
+            transparent 2px
+    );
+    animation: vhsScan 10s linear infinite;
+}
+
+@keyframes vhsScan {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+}
